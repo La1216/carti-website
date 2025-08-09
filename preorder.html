@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Cartioré Luxe — Preorder</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#000;color:#fff;font-family:Inter,Arial;display:flex;align-items:center;justify-content:center;height:100vh}
+  .box{width:420px;background:rgba(0,0,0,0.85);padding:36px;border-radius:8px}
+  .logo{color:#e50914;font-weight:800;font-size:22px;margin-bottom:12px;text-align:center}
+  h2{text-align:center;margin:6px 0 18px}
+  input,select{width:100%;padding:12px;margin:8px 0;border-radius:6px;border:1px solid #222;background:#0b0b0b;color:#fff}
+  button{width:100%;padding:12px;background:#e50914;border:none;color:#fff;border-radius:6px;font-weight:700;cursor:pointer}
+  .small{color:#999;font-size:13px;text-align:center;margin-top:12px}
+</style>
+</head>
+<body>
+
+<div class="box">
+  <div class="logo">CARTIORÉ LUXE</div>
+  <h2>Preorder Your Item</h2>
+
+  <form id="preorderForm">
+    <input id="name" type="text" placeholder="Full name" required>
+    <input id="email" type="email" placeholder="Email address" required>
+    <input id="item" type="text" placeholder="Preferred item" readonly required>
+    <select id="size">
+      <option value="">Choose size (optional)</option>
+      <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
+    </select>
+    <button type="submit">Preorder Now</button>
+  </form>
+
+  <div class="small">
+    By clicking Preorder you agree to be contacted. <br>
+    <a href="cartioreeeeluxe.html" style="color:#fff;text-decoration:underline">Back to home</a>
+  </div>
+</div>
+
+<script>
+/* Set your backend URL here */
+const BACKEND = (window.location.hostname === 'localhost' ? 'http://localhost:3000' : '');
+
+function getQueryParam(name){
+  const params = new URLSearchParams(window.location.search);
+  return params.get(name) || '';
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  const item = decodeURIComponent(getQueryParam('item'));
+  document.getElementById('item').value = item;
+});
+
+document.getElementById('preorderForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const item = document.getElementById('item').value.trim();
+  const size = document.getElementById('size').value || '';
+  if(!name || !email || !item){ alert('Please fill name, email and item.'); return; }
+
+  try {
+    const res = await fetch((BACKEND || '') + '/api/preorder', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ name, email, item, size })
+    });
+    const body = await res.json();
+    if(res.ok){
+      alert('Preorder successful — thank you! You will receive a confirmation email shortly.');
+      window.location.href = 'index.html';
+    } else {
+      alert('Server error: ' + (body.message || 'Failed to submit preorder.'));
+    }
+  } catch(err){
+    alert('Could not contact server. Make sure the backend is running. Error: ' + err.message);
+  }
+});
+</script>
+</body>
+</html>
